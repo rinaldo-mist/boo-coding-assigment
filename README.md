@@ -1,5 +1,8 @@
 # Testing Backend Engineer
 
+## commands
+npm install mongoose mongodb-memory-server nodemon jest supertest
+
 ## API List
 ### new profile
 curl --location 'http://localhost:3000/profile' \

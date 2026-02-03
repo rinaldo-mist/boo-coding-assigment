@@ -33,7 +33,6 @@ module.exports = function() {
 
   router.get('/profile/:id', async function(req, res, next) {
     const id = req.params.id;
-    console.log(id);
     await Profile.findById(id).lean().then(data =>{
         res.render('profile_template', {
         profile: data,
@@ -43,10 +42,8 @@ module.exports = function() {
 
   router.post('/profile', async function(req, res, next) {
     const newProfile = new Profile(req.body);
-    console.log(`payload : ${newProfile}`);
     await Profile.create(newProfile).then(data =>{
-        console.log(data);
-        res.redirect('/');
+        res.status(200).json(data);
     }).catch(err => res.status(500).json({ message: `error found : ${err}` }));    
   });
 
@@ -72,7 +69,6 @@ module.exports = function() {
       if (!receiver) {
         return res.status(404).json({ message: 'Profile not found' });
       }
-      console.log(`Profile found ! ${receiver}`);
 
       // build impression query
       const query = {
@@ -114,8 +110,6 @@ module.exports = function() {
       if (enneagram !== undefined && enneagram.trim() !== null) {
         query.enneagram = enneagram.trim().toUpperCase();
       }
-
-      console.log('Filter applied !', query);
 
       // fetch impression (child)
       const impressions = await Impression.find(query)
@@ -161,18 +155,15 @@ module.exports = function() {
         res.status(404).json({ message: `impression not found` });
       }
 
-      console.log(`impression exists : ${impressionExists}`);
-
       const updated = await Impression.findByIdAndUpdate(
         {
           _id: id,
           vote: { $gt: 0 }
         },
         { $inc: { vote: voteCt } }, // atomic increment
-        { new: true, select: 'profileId' }
+        { new: true, select: 'vote' }
       ).then(data =>{
-          console.log(data);
-          res.status(200).json({message: "success updating impression.."});
+          res.status(200).json(data);
       }).catch(err => res.status(500).send(`error found : ${err}`));
     } else {
       const receiverId = req.body.receiverId;
@@ -184,8 +175,6 @@ module.exports = function() {
       if (!profileExists) {
         res.status(404).json({ message: `error found : ${err}` });
       }
-
-      console.log(`new impression : ${newImpression}`);
       
       const vote = req.body.fav === undefined || !req.body.fav ? 0 : 1 ;
 
@@ -194,33 +183,10 @@ module.exports = function() {
       newImpression.vote = vote;
 
       await Impression.create(newImpression).then(data =>{
-          console.log(data);
-          res.status(200).json({message: "success create impression.."});
+          res.status(200).json(data);
       }).catch(err => res.status(500).send(`error found : ${err}`));
     }    
   });
-
-  // router.put('/profile/impression', async function(req, res, next) {
-  //   const id = req.body.impressionId;
-  //   const vote = req.body.like === undefined || !req.body.like ? 0 : 1 ;
-
-  //   // check profile exists
-  //   const impressionExists = await Impression.exists({ _id: id});
-  //   if (!impressionExists) {
-  //     res.status(404).json({ message: `impression not found : ${err}` });
-  //   }
-
-  //   console.log(`new impression : ${newImpression}`);
-
-  //   const updated = await Impression.findByIdAndUpdate(
-  //     id,
-  //     { $inc: { vote: 1 } }, // atomic increment
-  //     { new: true, select: 'profileId' }
-  //   ).then(data =>{
-  //       console.log(data);
-  //       res.redirect(`/profile/${updated}`);
-  //   }).catch(err => res.status(500).send(`error found : ${err}`));
-  // });
 
   return router;
 }
