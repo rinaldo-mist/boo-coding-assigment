@@ -1,6 +1,6 @@
 # Testing Backend Engineer
 
-## commands
+## Prerequisite
 npm install mongoose mongodb-memory-server nodemon jest supertest
 
 ## API List
@@ -54,3 +54,11 @@ curl --location 'http://localhost:3000/profile/impression' \
     "zodiac": "Scorpio",
     "enneagram": "8w2"
 }'
+
+## How To Run
+### start
+npm start
+### development
+npm run dev
+### tests
+npm run test
